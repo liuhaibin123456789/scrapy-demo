@@ -23,6 +23,7 @@ func main() {
 	})
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		//获取标签的元素值
 		attr := e.Attr("href")
 		println(e.Name, ":", attr)
 	})
