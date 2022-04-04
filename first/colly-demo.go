@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
+	"github.com/gocolly/colly/proxy"
+	"github.com/gocolly/colly/queue"
 	"time"
 )
 
@@ -19,7 +21,7 @@ func main() {
 		DomainRegexp: "",
 		DomainGlob:   "www.qb5.tw/*",
 		Delay:        time.Second * 10,
-		Parallelism:  1,
+		Parallelism:  5,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -42,16 +44,16 @@ func main() {
 	//随机设置browser user agent
 	extensions.RandomUserAgent(c)
 
-	////设置代理
-	//proxySwitcher, err := proxy.RoundRobinProxySwitcher(
-	//	"socks5://127.0.0.1:7890",
-	//	"socks5://127.0.0.1:7899",
-	//)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//c.SetProxyFunc(proxySwitcher)
+	//设置代理
+	proxySwitcher, err := proxy.RoundRobinProxySwitcher(
+		"socks5://127.0.0.1:7890",
+		"socks5://127.0.0.1:7899",
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	c.SetProxyFunc(proxySwitcher)
 
 	////加入队列
 	//q, err := queue.New(1, &redisStorge)
@@ -80,6 +82,8 @@ func main() {
 	//	fmt.Println(err)
 	//	return
 	//}
-
-	c.Visit("https://www.qb5.tw/book_45014/51463277.html")
+	q, _ := queue.New(5, &queue.InMemoryQueueStorage{MaxSize: 10000})
+	q.AddURL("https://www.qb5.tw/book_45014/49913651.html")
+	q.Run(c)
+	//c.Visit("https://www.qb5.tw/book_45014/49913651.html")
 }
